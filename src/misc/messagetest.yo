@@ -1,0 +1,93 @@
+  0x000: 30f001000000 | 	irmovl	$1, %eax	
+  0x006: 30f200040000 | 	irmovl  $1024, %edx	
+  0x00c: e00200000000 | 	mutex	(%edx), %eax					# Get id from addr_1024 shm_start
+  0x012: 30f100000000 | 	irmovl 	$0, %ecx
+  0x018: 6101         | 	subl	%eax, %ecx
+  0x01a: 74c4000000   | 	jne	Receiver							# If ID == 0, Sender
+  0x01f:              | Sender:	
+  0x01f: 30f101000000 | 	irmovl  $1, %ecx
+                      | 
+  0x025:              | LoopSender:	
+  0x025: 30f220040000 | 	irmovl  $1056, %edx
+  0x02b: 500200000000 | 	mrmovl  (%edx), %eax
+  0x031: 30f300000000 | 	irmovl  $0, %ebx						# M is the value in addr_1056
+  0x037: 6103         | 	subl	%eax, %ebx
+  0x039: 7488000000   | 	jne	Reset								# If M == 0, Send Something
+  0x03e: 30f240040000 | 	irmovl	$1088, %edx						# V is the value in addr_1088
+  0x044: 30f300000000 | 	irmovl  $0, %ebx						# %ebx is the tmp count
+  0x04a:              | SendAct:
+  0x04a: 500200000000 | 	mrmovl	(%edx), %eax
+  0x050: c0f001000000 | 	iaddl	$1,	%eax
+  0x056: 400200000000 | 	rmmovl	%eax, (%edx)					# set target value +=1
+                      | 	
+  0x05c: c0f220000000 | 	iaddl	$32, %edx
+  0x062: c0f301000000 | 	iaddl	$1, %ebx
+                      | 
+  0x068: 2017         | 	rrmovl	%ecx, %edi
+  0x06a: 6137         | 	subl	%ebx, %edi
+  0x06c: 744a000000   | 	jne	SendAct
+                      | 
+  0x071: 30f220040000 | 	irmovl	$1056, %edx	
+  0x077: 30f001000000 | 	irmovl  $1, %eax
+  0x07d: 400200000000 | 	rmmovl  %eax, (%edx)					# set M = 1
+  0x083: 70a7000000   | 	jmp	SendWait
+  0x088:              | Reset:
+  0x088: 30f302000000 | 	irmovl	$2, %ebx
+  0x08e: 6103         | 	subl	%eax, %ebx
+  0x090: 74a7000000   | 	jne	SendWait							# reset the signal
+                      | 										
+  0x095: 30f000000000 | 	irmovl  $0, %eax
+  0x09b: 400200000000 | 	rmmovl  %eax, (%edx)					# set M = 0
+  0x0a1: c0f101000000 | 	iaddl	$1, %ecx
+  0x0a7:              | SendWait:
+  0x0a7: 30f0e9030000 | 	irmovl  $1001, %eax
+  0x0ad: 6110         | 	subl	%ecx, %eax						# Message end
+  0x0af: 7425000000   | 	jne	LoopSender							# else to LoopSender
+  0x0b4: 70b9000000   | 	jmp	LoopSenderEnd
+                      | 
+  0x0b9:              | LoopSenderEnd:	
+  0x0b9: 30f201000000 | 	irmovl	$1, %edx						
+  0x0bf: 704b010000   | 	jmp	end
+                      | 
+  0x0c4:              | Receiver:
+  0x0c4: 30f101000000 | 	irmovl  $1, %ecx						# count = 0
+                      | 
+  0x0ca:              | LoopReceiver:	
+  0x0ca: 30f220040000 | 	irmovl  $1056, %edx						# M is the value in addr_1056
+  0x0d0: 500200000000 | 	mrmovl  (%edx), %eax
+  0x0d6: 30f301000000 | 	irmovl  $1, %ebx	
+                      | 	
+  0x0dc: 6103         | 	subl	%eax, %ebx
+  0x0de: 7433010000   | 	jne	ReceiveWait							# If M == 1 receive something
+  0x0e3: 30f240040000 | 	irmovl	$1088, %edx
+  0x0e9: 30f300000000 | 	irmovl	$0, %ebx
+  0x0ef:              | ReceiveAct:
+  0x0ef: 500200000000 | 	mrmovl	(%edx), %eax
+  0x0f5: c0f001000000 | 	iaddl	$1,	%eax
+  0x0fb: 400200000000 | 	rmmovl	%eax, (%edx)					# set value +=1
+                      | 
+  0x101: c0f220000000 | 	iaddl	$32, %edx
+  0x107: c0f301000000 | 	iaddl	$1, %ebx
+                      | 
+  0x10d: 2017         | 	rrmovl	%ecx, %edi
+  0x10f: 6137         | 	subl	%ebx, %edi
+  0x111: 74ef000000   | 	jne	ReceiveAct	
+                      | 
+  0x116: 30f220040000 | 	irmovl	$1056, %edx
+  0x11c: 30f002000000 | 	irmovl  $2, %eax
+  0x122: 400200000000 | 	rmmovl  %eax, (%edx)					# release the signal
+                      | 	
+  0x128: c0f101000000 | 	iaddl	$1, %ecx						# count += 1
+  0x12e: 7033010000   | 	jmp	LoopReceiverLast
+  0x133:              | ReceiveWait:
+  0x133:              | LoopReceiverLast:			
+  0x133: 30f0e9030000 | 	irmovl  $1001, %eax
+  0x139: 6110         | 	subl	%ecx, %eax	
+  0x13b: 74ca000000   | 	jne	LoopReceiver						# Have other message and go to LoopReceiver
+  0x140: 30f202000000 | 	irmovl	$2, %edx						# else to LoopReceiverEnd
+  0x146: 704b010000   | 	jmp	end									
+                      | 
+  0x14b:              | end:	
+  0x14b: 30f200040000 | 	irmovl	$1024, %edx
+  0x151: 30f000000000 | 	irmovl	$0, %eax
+  0x157: 400200000000 | 	rmmovl	%eax, (%edx)					

@@ -216,7 +216,7 @@ bool_t diff_mem(mem_t oldm, mem_t newm, FILE *outfile)
     	if (nv != ov) {
     	    diff = TRUE;
     	    if (outfile)
-    		  fprintf(outfile, "0x%.4x:\t0x%.8x\t0x%.8x\n", pos, ov, nv);
+    		  fprintf(outfile, "0x%.4x:\t0x%.8x\t0x%.8x\t%d\t%d\n", pos, ov, nv, ov, nv);
     	}
     }
     return diff;

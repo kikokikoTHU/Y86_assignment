@@ -34,7 +34,7 @@ SendAct:
 Reset:
 	irmovl	$2, %ebx
 	subl	%eax, %ebx
-	jne	SendWait							# If M == 2, Received and send more
+	jne	SendWait							# reset the signal
 										
 	irmovl  $0, %eax
 	rmmovl  %eax, (%edx)					# set M = 0
@@ -75,7 +75,7 @@ ReceiveAct:
 
 	irmovl	$1056, %edx
 	irmovl  $2, %eax
-	rmmovl  %eax, (%edx)					# set M = 2
+	rmmovl  %eax, (%edx)					# release the signal
 	
 	iaddl	$1, %ecx						# count += 1
 	jmp	LoopReceiverLast
@@ -90,4 +90,4 @@ LoopReceiverLast:
 end:	
 	irmovl	$1024, %edx
 	irmovl	$0, %eax
-	rmmovl	%eax, (%edx)					# set the value of addr_1024 = 0
+	rmmovl	%eax, (%edx)					
