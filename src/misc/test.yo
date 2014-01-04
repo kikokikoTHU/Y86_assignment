@@ -1,0 +1,97 @@
+  0x000: 30f001000000 | 	irmovl	$1, %eax	
+  0x006: 30f200040000 | 	irmovl  $1024, %edx	
+  0x00c: e00200000000 | 	mutex	(%edx), %eax	#exchange %eax, (addr_1024)
+  0x012: 30f100000000 | 	irmovl 	$0, %ecx
+  0x018: 6101         | 	subl	%eax, %ecx
+  0x01a: 74cf000000   | 	jne	ProgramB	# if(%eax == 0)
+  0x01f:              | ProgramA:	
+  0x01f: 30f101000000 | 	irmovl  $1, %ecx	# %ecx = 1
+                      | 
+  0x025: 30f220040000 | LoopA:	irmovl  $1056, %edx
+  0x02b: 500200000000 | 	mrmovl  (%edx), %eax
+  0x031: 30f300000000 | 	irmovl  $0, %ebx	# M is the value in addr_1056
+  0x037: 6103         | 	subl	%eax, %ebx
+  0x039: 7488000000   | 	jne	AIFM2		#if(M == 0)
+  0x03e:              | AIFM0:
+  0x03e: 30f240040000 | 	irmovl	$1088, %edx	# V is the value in addr_1088
+  0x044: 30f300000000 | 	irmovl  $0, %ebx	# %ebx is the count
+  0x04a:              | AINNER:
+  0x04a: 500200000000 | 	mrmovl	(%edx), %eax
+  0x050: c0f001000000 | 	iaddl	$1,	%eax
+  0x056: 400200000000 | 	rmmovl	%eax, (%edx)	# set target value +=1
+                      | 	
+  0x05c: c0f220000000 | 	iaddl	$32, %edx
+  0x062: c0f301000000 | 	iaddl	$1, %ebx
+                      | 
+  0x068: 2017         | 	rrmovl	%ecx, %edi
+  0x06a: 6137         | 	subl	%ebx, %edi
+  0x06c: 744a000000   | 	jne	AINNER
+                      | 
+  0x071: 30f220040000 | 	irmovl	$1056, %edx	
+  0x077: 30f001000000 | 	irmovl  $1, %eax
+  0x07d: 400200000000 | 	rmmovl  %eax, (%edx)	# set M = 1
+  0x083: 70b2000000   | 	jmp	LoopALast
+  0x088:              | AIFM2:
+  0x088: 30f302000000 | 	irmovl	$2, %ebx
+  0x08e: 6103         | 	subl	%eax, %ebx
+  0x090: 74b2000000   | 	jne	AELSE		# if(M == 2)
+                      | 				# here can get something
+  0x095: 30f220040000 | 	irmovl	$1056, %edx
+  0x09b: 30f000000000 | 	irmovl  $0, %eax
+  0x0a1: 400200000000 | 	rmmovl  %eax, (%edx)	# set M = 0
+  0x0a7: c0f101000000 | 	iaddl	$1, %ecx
+  0x0ad: 70b2000000   | 	jmp	LoopALast	
+  0x0b2:              | AELSE:
+  0x0b2:              | LoopALast:
+  0x0b2: 30f001040000 | 	irmovl  $1025, %eax
+  0x0b8: 6110         | 	subl	%ecx, %eax	# if(%ecx == 100) to LoopAEnd
+  0x0ba: 7425000000   | 	jne	LoopA		# else to LoopA
+  0x0bf: 70c4000000   | 	jmp	LoopAEnd
+                      | 
+  0x0c4:              | LoopAEnd:	
+  0x0c4: 30f201000000 | 	irmovl	$1, %edx	# %edx = 1 via the first path
+  0x0ca: 705b010000   | 	jmp	end
+                      | 
+  0x0cf:              | ProgramB:
+  0x0cf: 30f101000000 | 	irmovl  $1, %ecx	# %ecx = 0
+                      | 
+  0x0d5: 30f220040000 | LoopB:	irmovl  $1056, %edx	M is the value in addr_1056
+  0x0db: 500200000000 | 	mrmovl  (%edx), %eax
+  0x0e1: 30f301000000 | 	irmovl  $1, %ebx	
+                      | 	
+  0x0e7: 6103         | 	subl	%eax, %ebx
+  0x0e9: 743e010000   | 	jne	BELSE		#if(M == 1)
+  0x0ee:              | BIFM1:
+  0x0ee: 30f240040000 | 	irmovl	$1088, %edx
+  0x0f4: 30f300000000 | 	irmovl	$0, %ebx
+  0x0fa:              | BINNER:
+  0x0fa: 500200000000 | 	mrmovl	(%edx), %eax
+  0x100: c0f001000000 | 	iaddl	$1,	%eax
+  0x106: 400200000000 | 	rmmovl	%eax, (%edx)	# set value +=1
+                      | 
+  0x10c: c0f220000000 | 	iaddl	$32, %edx
+  0x112: c0f301000000 | 	iaddl	$1, %ebx
+                      | 
+  0x118: 2017         | 	rrmovl	%ecx, %edi
+  0x11a: 6137         | 	subl	%ebx, %edi
+  0x11c: 74fa000000   | 	jne	BINNER	
+                      | 
+  0x121: 30f220040000 | 	irmovl	$1056, %edx
+  0x127: 30f002000000 | 	irmovl  $2, %eax
+  0x12d: 400200000000 | 	rmmovl  %eax, (%edx)	# set M = 2
+                      | 	
+  0x133: c0f101000000 | 	iaddl	$1, %ecx	# %ecx += 1
+  0x139: 703e010000   | 	jmp	LoopBLast
+  0x13e:              | BELSE:
+  0x13e:              | LoopBLast:			
+  0x13e: 30f001040000 | 	irmovl  $1025, %eax
+  0x144: 6110         | 	subl	%ecx, %eax	
+  0x146: 74d5000000   | 	jne	LoopB		# if(%ecx != 1025)	to LoopB
+  0x14b: 7050010000   | 	jmp	LoopBEnd	# else to LoopBEnd
+  0x150:              | LoopBEnd:
+  0x150: 30f202000000 | 	irmovl	$2, %edx	
+  0x156: 705b010000   | 	jmp	end		# %edx = 2 via the second path
+                      | 
+  0x15b: 30f200040000 | end:	irmovl	$1024, %edx
+  0x161: 30f000000000 | 	irmovl	$0, %eax
+  0x167: 400200000000 | 	rmmovl	%eax, (%edx)	# set the value of addr_1024 = 0
