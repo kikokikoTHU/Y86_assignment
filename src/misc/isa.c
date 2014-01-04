@@ -13,9 +13,9 @@ extern int gui_mode;
 #define BPL 32
 
 /* Ex.2 */
-#define SHMKEY 1000
+#define SHMKEY 2000
 #define SHMSTART 1024
-#define SHMEND 36928
+#define SHMEND 40960
 int shm_size = -1;
 unsigned char* shm_addr = NULL;
 

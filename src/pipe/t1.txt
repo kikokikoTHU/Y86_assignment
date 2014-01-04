@@ -1,5 +1,5 @@
-size: 35904, id: 17563664
-10875943 instructions executed
+size: 39936, id: 6651909
+11044441 instructions executed
 Status = HLT
 Condition Codes: Z=1 S=0 O=0
 Changed Register State:
@@ -1030,4 +1030,4 @@ Changed Memory State:
 0x83e0:	0x00000000	0x00000006
 0x8400:	0x00000000	0x00000004
 0x8420:	0x00000000	0x00000002
-CPI: 10875939 cycles/10344991 instructions = 1.05
+CPI: 11044437 cycles/10513489 instructions = 1.05
